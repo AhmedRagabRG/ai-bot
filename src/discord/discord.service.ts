@@ -21,9 +21,18 @@ export class BotService {
   async onMessage(msg: Message) {
     try {
       if (!msg.author.bot) {
+        const attachments = msg.attachments;
+        const attachment = attachments.values().next().value;
+        const imageUrl = attachment.url;
+
+        if (imageUrl) {
+          const response = await this.geminiService.generateTextFromMultiModal(msg.content, imageUrl);
+          msg.reply(response.text); 
+        }
+
         this.logger.log(`Received message: ${msg.content}`);
-        const response = await this.geminiService.generateText(msg.content);
-        msg.reply(response.text); 
+        // const response = await this.geminiService.generateText(msg.content);
+        // msg.reply(response.text); 
       }
     } catch (error) {
       this.logger.error(`Error processing message: ${error.message}`, error.stack);

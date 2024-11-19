@@ -1,23 +1,27 @@
 import { Content, Part } from '@google/generative-ai';
+import axios from 'axios';
 
-export function createContent(
-  text: string,
-  ...images: Express.Multer.File[]
-): Content[] {
-  const imageParts: Part[] = images.map((image) => {
-    return {
-      inlineData: {
-        mimeType: image.mimetype,
-        data: image.buffer.toString('base64'),
-      },
-    };
-  });
+export async function createContent(text: string, img: any) {
+  const response = await axios({
+    method: 'get',
+    url: `${img}`,
+    responseType: 'arraybuffer',
+  }); 
+  
+  const imageBuffer = Buffer.from(response.data);
+  
+  const imageParts: Part = {
+    inlineData: {
+      mimeType: 'image/jpeg',
+      data: imageBuffer.toString('base64'),
+    }
+  }
 
   return [
     {
       role: 'user',
       parts: [
-        ...imageParts,
+        imageParts,
         {
           text,
         },

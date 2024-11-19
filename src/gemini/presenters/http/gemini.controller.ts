@@ -11,6 +11,7 @@ import {
   FileFieldsInterceptor,
   FileInterceptor,
 } from '@nestjs/platform-express';
+import axios from 'axios';
 import { GeminiService } from 'src/gemini/application/gemini.service';
 import { fileValidatorPipe } from 'src/pipes/file-validator.pipe';
 
@@ -19,8 +20,8 @@ export class GeminiController {
   constructor(private service: GeminiService) {}
 
   @Post('text')
-  generateText(@Body() dto: any): Promise<any> {
-    return this.service.generateText(dto.prompt);
+  generateText(@Body() dto: any):any {
+    // return this.service.generateText(dto.prompt);
   }
   
   @Post('text-and-image')
@@ -37,7 +38,7 @@ export class GeminiController {
   @UseInterceptors(
     FileFieldsInterceptor([
       { name: 'first', maxCount: 1 },
-      { name: 'second', maxCount: 1 },
+        { name: 'second', maxCount: 1 },
     ]),
   )
   async analyseImages(

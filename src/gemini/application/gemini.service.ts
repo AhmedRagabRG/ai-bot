@@ -9,6 +9,7 @@ import {
   GEMINI_PRO_MODEL,
   GEMINI_PRO_VISION_MODEL,
 } from '../constant/gemini.constant';
+import axios from 'axios';
 
 @Injectable()
 export class GeminiService {
@@ -18,29 +19,33 @@ export class GeminiService {
     private readonly proVisionModel: GenerativeModel,
   ) {}
 
-  async generateText(prompt: string): Promise<any> {
-    const contents = createContent(prompt);
+  // async generateText(prompt: string): Promise<any> {
+  //   const contents = createContent(prompt);
 
-    const { totalTokens } = await this.proModel.countTokens({ contents });
-    console.log(totalTokens);
-    const result = await this.proModel.generateContent({ contents });
-    const response = await result.response;
-    const text = response.text();
+  //   const { totalTokens } = await this.proModel.countTokens({ contents });
+  //   console.log(totalTokens);
+  //   const result = await this.proModel.generateContent({ contents });
+  //   const response = await result.response;
+  //   const text = response.text();
 
-    return { totalTokens, text };
-  }
+  //   return { totalTokens, text };
+  // }
 
   async generateTextFromMultiModal(
     prompt: string,
-    file: Express.Multer.File,
+    file: any,
   ): Promise<any> {
     try {
-      const contents = createContent(prompt, file);
-
+      const contents = await createContent(prompt, file);
+      console.log(contents);
       const { totalTokens } = await this.proVisionModel.countTokens({
         contents,
       });
+      console.log('point two');
+      
       const result = await this.proVisionModel.generateContent({ contents });
+      console.log('point three');
+
       const response = await result.response;
       const text = response.text();
 
@@ -54,22 +59,22 @@ export class GeminiService {
   }
 
   async analyzeImages({ prompt, firstImage, secondImage }: any): Promise<any> {
-    try {
-      const contents = createContent(prompt, firstImage, secondImage);
+    // try {
+    //   const contents = createContent(prompt, firstImage, secondImage);
 
-      const { totalTokens } = await this.proVisionModel.countTokens({
-        contents,
-      });
-      const result = await this.proVisionModel.generateContent({ contents });
-      const response = await result.response;
-      const text = response.text();
+    //   const { totalTokens } = await this.proVisionModel.countTokens({
+    //     contents,
+    //   });
+    //   const result = await this.proVisionModel.generateContent({ contents });
+    //   const response = await result.response;
+    //   const text = response.text();
 
-      return { totalTokens, text };
-    } catch (err) {
-      if (err instanceof Error) {
-        throw new InternalServerErrorException(err.message, err.stack);
-      }
-      throw err;
-    }
+    //   return { totalTokens, text };
+    // } catch (err) {
+    //   if (err instanceof Error) {
+    //     throw new InternalServerErrorException(err.message, err.stack);
+    //   }
+    //   throw err;
+    // }
   }
 }
