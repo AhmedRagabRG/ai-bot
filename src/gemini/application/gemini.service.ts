@@ -4,47 +4,60 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { createContent } from 'src/helper/content.helper';
-import {
-  GEMINI_PRO_MODEL,
-  GEMINI_PRO_VISION_MODEL,
-} from '../constant/gemini.constant';
-import axios from 'axios';
+import { createContent, createTextContent } from 'src/helper/content.helper';
+import { GEMINI_PRO_MODEL } from '../constant/gemini.constant';
 
 @Injectable()
 export class GeminiService {
   constructor(
-    @Inject(GEMINI_PRO_MODEL) private readonly proModel: GenerativeModel,
-    @Inject(GEMINI_PRO_VISION_MODEL)
-    private readonly proVisionModel: GenerativeModel,
+    @Inject(GEMINI_PRO_MODEL) private readonly genAI: GenerativeModel,
   ) {}
 
-  // async generateText(prompt: string): Promise<any> {
-  //   const contents = createContent(prompt);
+  async generateText(prompt: string): Promise<any> {
+    const contents = await createTextContent(prompt);
+    const { totalTokens } = await this.genAI.countTokens({ contents });
+    const result = await this.genAI.generateContent({ contents });
+    const response = await result.response;
+    const text = response.text();
+    return { totalTokens, text };
+  }
 
-  //   const { totalTokens } = await this.proModel.countTokens({ contents });
-  //   console.log(totalTokens);
-  //   const result = await this.proModel.generateContent({ contents });
-  //   const response = await result.response;
-  //   const text = response.text();
+  async startChat(prompt: string) {
+    console.log('Head')
+    const chat = await this.genAI.startChat({
+      history: [
+        {
+          role: "user",
+          parts: [{ text: "my name is ahmed" }],
+        },
+        {
+          role: "model",
+          parts: [{ text: "Great to meet you. What would you like to know?" }],
+        },
+      ],
+    });
+    console.log('Body')
+    let result = await chat.sendMessage(prompt);
+    console.log('sended')
+    const response = await result.response;
+    const text = response.text();
+    console.log('Footer')
+    console.log(text)
+    
+    return text
+  }
 
-  //   return { totalTokens, text };
-  // }
-
-  async generateTextFromMultiModal(
+  async generateTextFromMultiModalUrl(
     prompt: string,
-    file: any,
+    file: string,
   ): Promise<any> {
     try {
       const contents = await createContent(prompt, file);
-      console.log(contents);
-      const { totalTokens } = await this.proVisionModel.countTokens({
+      const { totalTokens } = await this.genAI.countTokens({
         contents,
       });
-      console.log('point two');
       
-      const result = await this.proVisionModel.generateContent({ contents });
-      console.log('point three');
+      const result = await this.genAI.generateContent({ contents });
 
       const response = await result.response;
       const text = response.text();

@@ -26,12 +26,12 @@ export class GeminiController {
   
   @Post('text-and-image')
   @UseInterceptors(FileInterceptor('file'))
-  async generateTextFromMultiModal(
+  async generateTextFromMultiModalUrl(
     @Body() dto: any,
     @UploadedFile(fileValidatorPipe)
-    file: Express.Multer.File,
+    imgUrl: string,
   ): Promise<any> {
-    return this.service.generateTextFromMultiModal(dto.prompt, file);
+    return this.service.generateTextFromMultiModalUrl(dto.prompt, imgUrl);
   }
 
   @Post('analyse-the-images')

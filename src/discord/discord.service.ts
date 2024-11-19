@@ -9,7 +9,7 @@ export class BotService {
 
   constructor(
     @InjectDiscordClient() private readonly client: Client,
-    private readonly geminiService: GeminiService
+    private readonly geminiService: GeminiService,
   ) {}
 
   @Once('ready')
@@ -21,21 +21,31 @@ export class BotService {
   async onMessage(msg: Message) {
     try {
       if (!msg.author.bot) {
+        this.logger.log(`Received message: ${msg.content}`);
+
         const attachments = msg.attachments;
         const attachment = attachments.values().next().value;
-        const imageUrl = attachment.url;
+        const imageUrl = attachment?.url;
 
         if (imageUrl) {
-          const response = await this.geminiService.generateTextFromMultiModal(msg.content, imageUrl);
-          msg.reply(response.text); 
+          const response =
+            await this.geminiService.generateTextFromMultiModalUrl(
+              msg.content,
+              imageUrl,
+            );
+          msg.reply(response.text);
+          return;
         }
 
-        this.logger.log(`Received message: ${msg.content}`);
-        // const response = await this.geminiService.generateText(msg.content);
-        // msg.reply(response.text); 
+        const response = await this.geminiService.startChat(msg.content);
+        console.log(response)
+        msg.reply(response);
       }
     } catch (error) {
-      this.logger.error(`Error processing message: ${error.message}`, error.stack);
+      this.logger.error(
+        `Error processing message: ${error.message}`,
+        error.stack,
+      );
     }
   }
 }

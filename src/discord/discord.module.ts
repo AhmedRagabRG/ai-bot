@@ -1,9 +1,7 @@
 import { Module } from '@nestjs/common';
 import { BotService } from './discord.service';
 import { GeminiModule } from 'src/gemini/gemini.module';
-import { GeminiService } from 'src/gemini/application/gemini.service';
 import { DiscordModule } from '@discord-nestjs/core';
-import { GeminiProModelProvider } from 'src/gemini/gemini.provider';
 import { GatewayIntentBits, Partials } from 'discord.js';
 
 @Module({
