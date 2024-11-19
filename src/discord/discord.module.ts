@@ -3,6 +3,7 @@ import { BotService } from './discord.service';
 import { GeminiModule } from 'src/gemini/gemini.module';
 import { DiscordModule } from '@discord-nestjs/core';
 import { GatewayIntentBits, Partials } from 'discord.js';
+import { UsersService } from 'src/users/users.service';
 
 @Module({
   imports: [
@@ -23,6 +24,6 @@ import { GatewayIntentBits, Partials } from 'discord.js';
     }),
     GeminiModule,
   ],
-  providers: [BotService],
+  providers: [BotService, UsersService],
 })
 export class BotModule {}

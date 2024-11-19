@@ -14,16 +14,18 @@ export class GeminiService {
   ) {}
 
   async generateText(prompt: string): Promise<any> {
+    console.log(prompt);
     const contents = await createTextContent(prompt);
     const { totalTokens } = await this.genAI.countTokens({ contents });
     const result = await this.genAI.generateContent({ contents });
     const response = await result.response;
     const text = response.text();
+    
     return { totalTokens, text };
   }
 
   async startChat(prompt: string) {
-    console.log('Head')
+    console.log('started chat');
     const chat = await this.genAI.startChat({
       history: [
         {
@@ -36,13 +38,11 @@ export class GeminiService {
         },
       ],
     });
-    console.log('Body')
+    console.log('footer');
     let result = await chat.sendMessage(prompt);
-    console.log('sended')
+    console.log('footer2');
     const response = await result.response;
     const text = response.text();
-    console.log('Footer')
-    console.log(text)
     
     return text
   }

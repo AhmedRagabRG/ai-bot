@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Once, InjectDiscordClient, On } from '@discord-nestjs/core';
 import { Client, Message } from 'discord.js';
 import { GeminiService } from 'src/gemini/application/gemini.service';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class BotService {
@@ -10,6 +11,7 @@ export class BotService {
   constructor(
     @InjectDiscordClient() private readonly client: Client,
     private readonly geminiService: GeminiService,
+    private readonly usersService: UsersService,
   ) {}
 
   @Once('ready')
@@ -19,9 +21,13 @@ export class BotService {
 
   @On('messageCreate')
   async onMessage(msg: Message) {
+    const { id, bot } = msg.author;
     try {
-      if (!msg.author.bot) {
+      if (!bot) {
         this.logger.log(`Received message: ${msg.content}`);
+        
+        const user = await this.usersService.findOne({discordId: id});
+        if (!user) return msg.reply('Your account is not registered. Please register your account first.');
 
         const attachments = msg.attachments;
         const attachment = attachments.values().next().value;
@@ -37,9 +43,8 @@ export class BotService {
           return;
         }
 
-        const response = await this.geminiService.startChat(msg.content);
-        console.log(response)
-        msg.reply(response);
+        const response = await this.geminiService.generateText(msg.content);
+        msg.reply(response.text);
       }
     } catch (error) {
       this.logger.error(
