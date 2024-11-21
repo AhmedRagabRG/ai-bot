@@ -32,19 +32,23 @@ export class BotService {
         const attachments = msg.attachments;
         const attachment = attachments.values().next().value;
         const imageUrl = attachment?.url;
+        const contentType = attachment?.contentType;
 
-        if (imageUrl) {
+        if (imageUrl && contentType) {
           const response =
             await this.geminiService.generateTextFromMultiModalUrl(
               msg.content,
-              imageUrl,
+              {
+                url: imageUrl,
+                type: contentType,
+              },
             );
           msg.reply(response.text);
           return;
         }
 
-        const response = await this.geminiService.generateText(msg.content);
-        msg.reply(response.text);
+        const response = await this.geminiService.startChat(msg.content);
+        // msg.reply(response);
       }
     } catch (error) {
       this.logger.error(

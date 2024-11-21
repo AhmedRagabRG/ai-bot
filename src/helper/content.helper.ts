@@ -1,20 +1,30 @@
 import { Content, Part } from '@google/generative-ai';
 import axios from 'axios';
+import * as mime from 'mime-types';
 
-export async function createContent(text: string, imgUrl?: string): Promise<Content[]> {
-  if (imgUrl) {
+export interface IFile {
+  url: string;
+  type: string;
+}
+
+export async function createContent(
+  text: string,
+  file?: IFile,
+): Promise<Content[]> {
+  if (file?.url) {
     const response = await axios({
       method: 'get',
-      url: imgUrl,
+      url: file.url,
       responseType: 'arraybuffer',
-    }); 
+    });
+
     const imageBuffer = Buffer.from(response.data);
     const imageParts: Part = {
       inlineData: {
-        mimeType: 'image/jpeg',
+        mimeType: file.type,
         data: imageBuffer.toString('base64'),
-      }
-    }
+      },
+    };
     return [
       {
         role: 'user',
@@ -26,7 +36,7 @@ export async function createContent(text: string, imgUrl?: string): Promise<Cont
         ],
       },
     ];
-  } 
+  }
 
   return [
     {
@@ -51,6 +61,6 @@ export async function createTextContent(text: string) {
           text,
         },
       ],
-    }
-  ]
+    },
+  ];
 }

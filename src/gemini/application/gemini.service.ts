@@ -4,17 +4,17 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { createContent, createTextContent } from 'src/helper/content.helper';
-import { GEMINI_PRO_MODEL } from '../constant/gemini.constant';
+import { GEMINI_PRO_MODEL } from 'src/gemini/constant/gemini.constant';
+import { createContent, createTextContent, IFile } from 'src/helper/content.helper';
 
 @Injectable()
 export class GeminiService {
   constructor(
     @Inject(GEMINI_PRO_MODEL) private readonly genAI: GenerativeModel,
+    // private readonly usersService: UsersService,
   ) {}
 
   async generateText(prompt: string): Promise<any> {
-    console.log(prompt);
     const contents = await createTextContent(prompt);
     const { totalTokens } = await this.genAI.countTokens({ contents });
     const result = await this.genAI.generateContent({ contents });
@@ -24,35 +24,26 @@ export class GeminiService {
     return { totalTokens, text };
   }
 
-  async startChat(prompt: string) {
-    console.log('started chat');
-    const chat = await this.genAI.startChat({
-      history: [
-        {
-          role: "user",
-          parts: [{ text: "my name is ahmed" }],
-        },
-        {
-          role: "model",
-          parts: [{ text: "Great to meet you. What would you like to know?" }],
-        },
-      ],
-    });
-    console.log('footer');
-    let result = await chat.sendMessage(prompt);
-    console.log('footer2');
+  async startChat(prompt: string, history: any = []) {
+    const contents = await createContent(prompt);
+    const chat = await this.genAI.startChat({history});
+    const { totalTokens } = await this.genAI.countTokens({ contents });
+    const result = await chat.sendMessage(`${prompt}`);
     const response = await result.response;
     const text = response.text();
     
-    return text
+    return { totalTokens, text };
   }
 
   async generateTextFromMultiModalUrl(
     prompt: string,
-    file: string,
+    file: IFile,
   ): Promise<any> {
     try {
-      const contents = await createContent(prompt, file);
+      const contents = await createContent(prompt, {
+        url: file.url,
+        type: file.type,
+      });
       const { totalTokens } = await this.genAI.countTokens({
         contents,
       });
