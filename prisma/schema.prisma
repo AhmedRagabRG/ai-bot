@@ -19,36 +19,56 @@ enum Tiers {
 }
 
 model User {
-  id        Int       @id @default(autoincrement())
-  discordId String?   @unique
-  email     String    @unique
-  password  String
-  name      String
-  phone     String
-  tier      Tiers     @default(free)
-  chats      Chat[]
-  history      History[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id          Int       @id @default(autoincrement())
+  uid         String    @unique @default(cuid())
+  discordId   String?   @unique
+  email       String    @unique
+  password    String
+  fullName    String
+  phoneNumber String
+  tier        Tiers     @default(free)
+  chats       Chat[]
+  history     History[]
+  discord     Discord[]
+  hashedRt    String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("users")
 }
 
 model Chat {
   id        Int       @id @default(autoincrement())
-  userId    Int
-  user      User      @relation(fields: [userId], references: [id])
-  history      History[]
-  name     String?
+  uid       String    @unique @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [uid])
+  history   History[]
+  name      String?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+
+  @@map("chats")
 }
 
 model History {
   id        Int      @id @default(autoincrement())
   role      String   @default("user")
   text      String
-  userId    Int
-  user      User     @relation(fields: [userId], references: [id])
-  chatId Int
-  chat      Chat     @relation(fields: [chatId], references: [id])
+  userId    String
+  user      User     @relation(fields: [userId], references: [uid])
+  chatId    String
+  chat      Chat     @relation(fields: [chatId], references: [uid])
   createdAt DateTime @default(now())
+}
+
+model Discord {
+  id          Int      @id @default(autoincrement())
+  discordId   String   @unique
+  userId      String
+  user        User     @relation(fields: [userId], references: [uid])
+  username    String
+  global_name String
+  avatar      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

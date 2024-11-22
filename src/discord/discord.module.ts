@@ -25,5 +25,6 @@ import { UsersService } from 'src/users/users.service';
     GeminiModule,
   ],
   providers: [BotService, UsersService],
+  exports: [BotService],
 })
 export class BotModule {}

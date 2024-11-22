@@ -6,12 +6,14 @@ import { DatabaseService } from 'src/database/database.service';
 export class UsersService {
   constructor(private databaseService: DatabaseService) {}
 
-  async findOne(
-    find: Prisma.UserWhereUniqueInput,
-  ): Promise<User | null> {
-    return this.databaseService.user.findUnique({
+  async findOne(find: Prisma.UserWhereUniqueInput): Promise<User | null> {
+    try {
+      return this.databaseService.user.findUnique({
         where: find,
-    });
+      });
+    } catch (err) {
+      throw new Error(err.message);
+    }
   }
 
   async createUser(data: Prisma.UserCreateInput): Promise<any> {
@@ -22,9 +24,39 @@ export class UsersService {
         },
       });
 
-      return user
+      return user;
     } catch (err) {
       throw new Error(err);
+    }
+  }
+
+  async updateUserRt(rt: string, userId: string): Promise<void> {
+    try {
+      await this.databaseService.user.updateMany({
+        where: {
+          uid: userId,
+        },
+        data: {
+          hashedRt: rt,
+        },
+      });
+    } catch (err) {
+      throw new Error(err.message);
+    }
+  }
+
+  async updateUser(uid: string, data: Prisma.UserUpdateInput): Promise<void> {
+    try {
+      await this.databaseService.user.update({
+        where: {
+          uid,
+        },
+        data: {
+          ...data,
+        },
+      });
+    } catch (err) {
+      throw new Error(err.message);
     }
   }
 }

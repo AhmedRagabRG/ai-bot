@@ -5,39 +5,34 @@ import {
   Get,
   Param,
   Post,
-  Request,
-  UploadedFile,
-  UploadedFiles,
   UseGuards,
-  UseInterceptors,
 } from '@nestjs/common';
-import {
-  FileFieldsInterceptor,
-  FileInterceptor,
-} from '@nestjs/platform-express';
 import { ChatService } from './chat.service';
-import { JwtAuthGuard } from 'src/auth/guards/passport-jwt.guard';
+import { AtGuard } from 'src/common/guards/at.guard';
 
 @Controller('gemini')
 export class ChatController {
   constructor(private chatService: ChatService) {}
 
   @Post('text')
+  @UseGuards(AtGuard)
   generateText(@Body() dto: any): any {
     return this.chatService.startChat(dto.prompt);
   }
 
   @Post('chats')
+  @UseGuards(AtGuard)
   getUserChats(@Body() dto: any): any {
-    return this.chatService.allChats(dto.id);
+    return this.chatService.allChats(dto.uid);
   }
 
-  @Get('chat/:id')
+  @Get('chat/:uid')
+  @UseGuards(AtGuard)
   getChat(@Param() params): any {
-    return this.chatService.getChat(+params.id);
+    return this.chatService.getChat(params.uid);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(AtGuard)
   @Post('chat/create')
   createChat(@Body() dto): any {
     return this.chatService.newChat(dto.name);

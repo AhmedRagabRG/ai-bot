@@ -3,22 +3,22 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { UsersModule } from 'src/users/users.module';
 import { JwtModule } from '@nestjs/jwt';
-import { LocalStrategy } from './stratiges/local.strategy';
-import { LocalAuthGuard } from './guards/passport-local.guard';
 import { PassportModule } from '@nestjs/passport';
-import { JwtStrategy } from './stratiges/jwt.startegy';
+import { AtStrategy } from './strategies/at.startegy';
+import { DiscordStrategy } from './strategies/discord.strategy';
+import { BotModule } from 'src/discord/discord.module';
+import { RtStrategy } from './strategies/rt.strategy';
 
 @Module({
   imports: [
     UsersModule,
     JwtModule.register({
-      global: true,
-      secret: "testsecret",
-      signOptions: { expiresIn: '5m' },
+      secret: '2024-11-22 20:20:12.420cm3t6qz2c0001yv8ffv6h8z09+2024-11-22 20:20:12.420',
     }),
-    PassportModule
+    PassportModule,
+    BotModule
   ],
-  providers: [AuthService, JwtStrategy, LocalStrategy, LocalAuthGuard],
+  providers: [AuthService, AtStrategy, RtStrategy, DiscordStrategy],
   controllers: [AuthController],
 })
 export class AuthModule {}

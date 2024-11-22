@@ -23,7 +23,7 @@ export class ChatService {
   async newChat(name: string) {
     return await this.databaseService.chat.create({
       data: {
-        userId: 1,
+        userId: '06747bce-25fb-456d-91da-da1ecff80084',
         name: name,
       },
     });
@@ -36,7 +36,7 @@ export class ChatService {
 
     if (useMemory) {
       const saved_history = await this.historyService.getHistory({
-        chatId: user.id,
+        userId: user.id,
       });
       this.history = saved_history;
     }
@@ -53,7 +53,7 @@ export class ChatService {
     return chats;
   }
  
-  async getChat(chatId: number) {
+  async getChat(chatId: string) {
     const chat = await this.historyService.getHistory({ chatId });
     return chat;
   }

@@ -9,6 +9,8 @@ import { ChatModule } from './chat/chat.module';
 import { HistoryService } from './history/history.service';
 import { HistoryModule } from './history/history.module';
 import configuration from './config/configuration';
+import { AtGuard } from './common/guards/at.guard';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -25,6 +27,12 @@ import configuration from './config/configuration';
     HistoryModule
   ],
   controllers: [],
-  providers: [HistoryService],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: AtGuard,
+    },
+    HistoryService
+  ],
 })
 export class AppModule {}
