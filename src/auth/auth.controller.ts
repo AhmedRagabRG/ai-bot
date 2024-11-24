@@ -4,6 +4,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  ParseUUIDPipe,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -41,12 +42,13 @@ export class AuthController {
     return this.authService.logout(userId);
   }
 
+  @Public()
   @Post('refresh-token')
   @HttpCode(HttpStatus.OK)
   @UseGuards(RtGuard)
   refreshToken(
     @GetCurrentUser('refreshToken') rt: string,
-    @GetCurrentUserId() userId: string,
+    @GetCurrentUserId(ParseUUIDPipe) userId: string,
   ) {
     return this.authService.refreshTokens(rt, userId);
   }
@@ -54,23 +56,24 @@ export class AuthController {
   @Get('discord')
   @HttpCode(HttpStatus.OK)
   @UseGuards(AtGuard, TierGuard, DiscordAuthGuard)
-  async discordLogin() {}
+  discordLogin() {}
 
   @Get('discord/callback')
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(AtGuard, TierGuard, DiscordAuthGuard)
-  async discordCallback(
+  discordCallback(
     @GetCurrentUser() user,
-    @GetCurrentUserId() userId: string,
+    @GetCurrentUserId(ParseUUIDPipe) userId: string,
   ) {
     this.authService.discordAuth(user, userId);
   }
 
   @Get('me')
-  @UseGuards(TierGuard, AtGuard)
+  @UseGuards(AtGuard)
   @HttpCode(HttpStatus.OK)
   me(@GetCurrentUser() user) {
     return {
+      user,
       MSG: 'User found',
     }
   }

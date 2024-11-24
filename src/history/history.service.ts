@@ -8,23 +8,38 @@ export class HistoryService {
 
   constructor(private databaseService: DatabaseService) {}
 
-  handleHistory(role: string, text: string) {
-    this.history.push({
-      role: role,
-      parts: [{ text: text }],
+  async saveHistory(chatId: string, userId: string, history: any) {
+    const handledHistoryData = [];
+
+    history.forEach((ele) => {
+      handledHistoryData.push({
+        userId: userId,
+        chatId: chatId,
+        role: ele.role,
+        text: ele.text,
+      });
     });
+
+    try {
+      await this.databaseService.history.createMany({
+        data: handledHistoryData,
+      });
+    } catch (error) {
+      console.error('Error saving history:', error);
+    }
   }
 
-  async getHistory(findInd: {}): Promise<Content[]> {
-    this.history = [];
-    const saved_history = await this.databaseService.history.findMany({
+  async getHistory(findInd: any): Promise<Content[]> {
+    const handledHistoryData = [];
+    const chatHistory = await this.databaseService.history.findMany({
       where: findInd,
     });
-
-    saved_history.forEach((element) => {
-      this.handleHistory(element.role, element.text);
+    chatHistory.forEach((ele) => {
+      handledHistoryData.push({
+        role: ele.role,
+        parts: [{ text: ele.text }],
+      });
     });
-
-    return this.history;
+    return handledHistoryData;
   }
 }

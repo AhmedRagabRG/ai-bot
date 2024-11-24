@@ -1,10 +1,11 @@
 import { Content } from '@google/generative-ai';
 import { Injectable } from '@nestjs/common';
+import { Chat } from '@prisma/client';
 import { DatabaseService } from 'src/database/database.service';
 import { GeminiService } from 'src/gemini/application/gemini.service';
 import { HistoryService } from 'src/history/history.service';
 import { UsersService } from 'src/users/users.service';
-
+import { v4 as uuidv4 } from 'uuid';
 @Injectable()
 export class ChatService {
   history: Content[] = [];
@@ -16,43 +17,61 @@ export class ChatService {
     private readonly databaseService: DatabaseService,
   ) {}
 
-  async handleHistory(role: string, text: string) {
-    this.historyService.handleHistory(role, text);
-  }
-
-  async newChat(name: string) {
-    return await this.databaseService.chat.create({
-      data: {
-        userId: '06747bce-25fb-456d-91da-da1ecff80084',
-        name: name,
-      },
-    });
-  }
-
-  async startChat(prompt: string, useMemory: boolean = true) {
-    const user = await this.usersService.findOne({
-      email: 'ahmed.shoshan@outlook.com',
-    });
-
-    if (useMemory) {
-      const saved_history = await this.historyService.getHistory({
-        userId: user.id,
+  async createChat(name: string, userId: string) {
+    const uid: string = uuidv4();
+    try {
+      const checkId: Chat = await this.databaseService.chat.findUnique({
+        where: { id: uid },
       });
-      this.history = saved_history;
+      if (checkId) throw new Error('try again');
+      return await this.databaseService.chat.create({
+        data: {
+          id: uid,
+          ownerId: userId,
+          name,
+        },
+      });
+    } catch (err) {
+      throw new Error('try again');
     }
-
-    this.historyService.handleHistory('user', prompt);
-    return this.geminiService.startChat(prompt, this.history);
   }
 
-  async allChats(userId) {
-    const chats = await this.databaseService.chat.findMany({
-      where: { userId },
+  async generateText(userId: string, chatId: string, prompt: string) {
+    try {
+      const chatHistory = await this.historyService.getHistory({ chatId });
+      const modelAnswer = await this.geminiService.startChat(
+        prompt,
+        chatHistory,
+      );
+      if (!modelAnswer) throw new Error('try again');
+      this.historyService.saveHistory(chatId, userId, [
+        {
+          role: 'user',
+          text: prompt,
+        },
+        {
+          role: 'model',
+          text: modelAnswer.text,
+        },
+      ]);
+
+      return {
+        prompt,
+        modelAnswer,
+      };
+    } catch (err) {
+      throw new Error('try again');
+    }
+  }
+
+  async findUserChats(userId: string): Promise<Chat[]> {
+    const chats: Chat[] = await this.databaseService.chat.findMany({
+      where: { ownerId: userId },
     });
 
     return chats;
   }
- 
+
   async getChat(chatId: string) {
     const chat = await this.historyService.getHistory({ chatId });
     return chat;

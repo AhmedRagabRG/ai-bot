@@ -122,7 +122,11 @@ export class AuthService {
   }
 
   async updateRtHash(rt: string, userId: string): Promise<void> {
-    const hashedRt: string = await bcrypt.hash(rt, 8);
+    let hashedRt: string | null = null;
+    if (rt) {
+      hashedRt = await bcrypt.hash(rt, 8);
+      return
+    }
     await this.usersService.updateUserRt(hashedRt, userId);
   }
 

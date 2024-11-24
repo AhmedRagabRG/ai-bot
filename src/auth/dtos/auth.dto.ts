@@ -4,18 +4,20 @@ export class RegisterDto {
   @IsString()
   @IsNotEmpty()
   @MinLength(3)
-  fullName: string;
+  readonly fullName: string;
 
   @IsEmail()
   @IsNotEmpty()
-  email: string;
+  readonly email: string;
 
   @IsString()
   @IsNotEmpty()
-  password: string;
+  @MinLength(8)
+  readonly password: string;
 
   @IsString()
-  phoneNumber: string;
+  @IsNotEmpty()
+  readonly phoneNumber: string;
 }
 
 export class SignInDto {
@@ -24,5 +26,7 @@ export class SignInDto {
   email!: string;
 
   @IsString()
+  @IsNotEmpty()
+  @MinLength(8)
   password: string;
 }
