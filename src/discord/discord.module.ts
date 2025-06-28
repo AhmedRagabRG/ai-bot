@@ -9,8 +9,7 @@ import { UsersService } from 'src/users/users.service';
   imports: [
     DiscordModule.forRootAsync({
       useFactory: () => ({
-        token:
-          'MTMwODE3MDk3NTE0MTAzNjE0Mw.GDVrSq.CvxGD7e3bDLrEl7pFghksuCSIGme8Ip1Xi9-4o',
+        token:'',
         discordClientOptions: {
           intents: [
             GatewayIntentBits.Guilds,
